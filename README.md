@@ -39,6 +39,34 @@
 
 # **🔥 Firecrawl**
 
+> **Fork note for self-hosted users / 自托管用户说明**
+>
+> **EN**
+>
+> This fork includes a fix for environments where public domains are resolved through `198.18.0.0/15` by VPN, enterprise DNS, or gateway layers.
+>
+> If your self-hosted Firecrawl instance fails to scrape public sites and you see errors like:
+>
+> - `Blocked insecure target URL`
+> - `hostname "example.com" resolves to a private IP`
+> - `/v1/scrape` or `/v2/scrape` returning scrape failures for normal public websites
+>
+> then this fork may help. The change allows `198.18.0.0/15` while still blocking loopback, RFC1918 private ranges, and link-local addresses.
+>
+> **中文**
+>
+> 这个 fork 包含一处针对自托管环境的修复，适用于 VPN、企业 DNS、网关层会把公开域名先解析到 `198.18.0.0/15` 的场景。
+>
+> 如果你的 self-hosted Firecrawl 在抓取公开网站时失败，并且出现下面这类报错：
+>
+> - `Blocked insecure target URL`
+> - `hostname "example.com" resolves to a private IP`
+> - `/v1/scrape` 或 `/v2/scrape` 对普通公开网站持续抓取失败
+>
+> 可以试试这个 fork。这个修改会允许 `198.18.0.0/15`，同时继续拦截 loopback、RFC1918 私网地址和 link-local 地址。
+>
+> See [`SELF_HOST.md`](./SELF_HOST.md) for details.
+
 **Power AI agents with clean web data.** The API to search, scrape, and interact with the web at scale. Open source and available as a [hosted service](https://firecrawl.dev/?ref=github).
 
 _Pst. Hey, you, join our stargazers :)_

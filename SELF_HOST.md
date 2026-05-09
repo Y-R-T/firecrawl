@@ -242,6 +242,13 @@ This fork allows `198.18.0.0/15` while still blocking loopback, RFC1918 private 
 - `/v2/scrape` works with `https://example.com`
 - `/v2/scrape` works with `https://firecrawl.dev`
 
+**中文说明：**
+如果你的 self-hosted Firecrawl 在抓取公开网站时失败，并且出现上面的报错，可以试试这个 fork。
+
+这个问题通常出现在 VPN、企业 DNS 或网关会把公开域名先解析到 `198.18.0.0/15` 的环境里。原本的实现会把所有非 `unicast` 地址一律拦截，所以请求会在真正发出前就失败。
+
+这个 fork 的修改是：允许 `198.18.0.0/15`，同时继续拦截 loopback、RFC1918 私网地址和 link-local 地址。
+
 By addressing these common issues, you can ensure a smoother setup and operation of your self-hosted Firecrawl instance.
 
 ## Install Firecrawl on a Kubernetes Cluster (Simple Version)
