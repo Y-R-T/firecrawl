@@ -12,11 +12,22 @@ export class InsecureConnectionError extends Error {
   }
 }
 
-export function isIPPrivate(address: string): boolean {
+function isBenchmarkingAddress(address: string): boolean {
   if (!IPAddr.isValid(address)) return false;
 
-  const addr = IPAddr.parse(address);
-  return addr.range() !== "unicast";
+  const parsedAddress = IPAddr.parse(address);
+  if (parsedAddress.kind() !== "ipv4") return false;
+
+  const [firstOctet, secondOctet] = parsedAddress.toByteArray();
+  return firstOctet === 198 && (secondOctet === 18 || secondOctet === 19);
+}
+
+export function isBlockedIPAddress(address: string): boolean {
+  if (!IPAddr.isValid(address)) return false;
+  if (isBenchmarkingAddress(address)) return false;
+
+  const parsedAddress = IPAddr.parse(address);
+  return parsedAddress.range() !== "unicast";
 }
 
 function createBaseAgent(skipTlsVerification: boolean) {
@@ -52,7 +63,7 @@ function attachSecurityCheck(agent: undici.Dispatcher) {
 
     if (
       socket.remoteAddress &&
-      isIPPrivate(socket.remoteAddress) &&
+      isBlockedIPAddress(socket.remoteAddress) &&
       config.ALLOW_LOCAL_WEBHOOKS !== true
     ) {
       socket.destroy(new InsecureConnectionError());

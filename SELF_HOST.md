@@ -216,6 +216,32 @@ API requests to the Firecrawl instance timeout or return no response.
 - Verify that the PORT and HOST settings in your .env file are correct and that no other service is using the same port.
 - Check the network configuration to ensure that the host is accessible from the client making the API request.
 
+### `Blocked insecure target URL` / `resolves to a private IP`
+
+**Symptom:**
+```bash
+Blocked insecure target URL "https://example.com": hostname "example.com" resolves to a private IP
+```
+
+This can affect both `/v1/scrape` and `/v2/scrape` in self-hosted deployments.
+
+**Explanation:**
+Some VPN, enterprise DNS, or gateway environments resolve public domains through `198.18.0.0/15` before forwarding traffic to the real public destination. Firecrawl previously treated every non-`unicast` IP as blocked, which caused these requests to fail before the outbound request was made.
+
+**What this fork changes:**
+This fork allows `198.18.0.0/15` while still blocking loopback, RFC1918 private ranges, and link-local addresses.
+
+**Files changed:**
+- `apps/playwright-service-ts/api.ts`
+- `apps/api/src/scraper/scrapeURL/engines/utils/safeFetch.ts`
+- `apps/api/src/services/webhook/delivery.ts`
+
+**Verified:**
+- `/v1/scrape` works with `https://example.com`
+- `/v1/scrape` works with `https://firecrawl.dev`
+- `/v2/scrape` works with `https://example.com`
+- `/v2/scrape` works with `https://firecrawl.dev`
+
 By addressing these common issues, you can ensure a smoother setup and operation of your self-hosted Firecrawl instance.
 
 ## Install Firecrawl on a Kubernetes Cluster (Simple Version)

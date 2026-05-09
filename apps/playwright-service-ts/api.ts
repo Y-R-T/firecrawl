@@ -34,8 +34,19 @@ const normalizeHostname = (hostname: string): string => hostname.toLowerCase().r
 
 const isHttpProtocol = (protocol: string): boolean => protocol === 'http:' || protocol === 'https:';
 
-const isIPPrivate = (address: string): boolean => {
+const isBenchmarkingAddress = (address: string): boolean => {
   if (!IPAddr.isValid(address)) return false;
+  const parsedAddress = IPAddr.parse(address);
+  if (parsedAddress.kind() !== 'ipv4') return false;
+
+  const [firstOctet, secondOctet] = parsedAddress.toByteArray();
+  return firstOctet === 198 && (secondOctet === 18 || secondOctet === 19);
+};
+
+const isBlockedIPAddress = (address: string): boolean => {
+  if (!IPAddr.isValid(address)) return false;
+  if (isBenchmarkingAddress(address)) return false;
+
   const parsedAddress = IPAddr.parse(address);
   return parsedAddress.range() !== 'unicast';
 };
@@ -84,7 +95,7 @@ const assertSafeTargetUrl = async (urlString: string): Promise<void> => {
   }
 
   if (IPAddr.isValid(hostname)) {
-    if (isIPPrivate(hostname)) {
+    if (isBlockedIPAddress(hostname)) {
       throw new InsecureConnectionError(urlString, `private IP "${hostname}" is not allowed`);
     }
     return;
@@ -107,7 +118,7 @@ const assertSafeTargetUrl = async (urlString: string): Promise<void> => {
     );
   }
 
-  if (resolvedAddresses.some(address => isIPPrivate(address))) {
+  if (resolvedAddresses.some(address => isBlockedIPAddress(address))) {
     throw new InsecureConnectionError(urlString, `hostname "${hostname}" resolves to a private IP`);
   }
 };

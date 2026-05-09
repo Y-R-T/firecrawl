@@ -4,7 +4,7 @@ import { createHmac } from "crypto";
 import { logger as _logger, logger } from "../../lib/logger";
 import {
   getSecureDispatcherNoCookies,
-  isIPPrivate,
+  isBlockedIPAddress,
 } from "../../scraper/scrapeURL/engines/utils/safeFetch";
 import type {
   WebhookConfig,
@@ -119,7 +119,7 @@ export class WebhookSender {
     scrapeId?: string,
   ): Promise<Omit<WebhookSendResult, "attempted">> {
     const webhookHost = new URL(this.config.url).hostname;
-    if (isIPPrivate(webhookHost) && config.ALLOW_LOCAL_WEBHOOKS !== true) {
+    if (isBlockedIPAddress(webhookHost) && config.ALLOW_LOCAL_WEBHOOKS !== true) {
       this.logger.warn("Aborting webhook call to private IP address", {
         webhookUrl: this.config.url,
       });
